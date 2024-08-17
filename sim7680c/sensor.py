@@ -7,14 +7,14 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_DECIBEL_MILLIWATT,
 )
-from . import CONF_SIM7680C_ID, Sim7680cComponent
+from . import CONF_SIM7680C_ID, Sim7680CComponent
 
 DEPENDENCIES = ["sim7680c"]
 
 CONF_RSSI = "rssi"
 
 CONFIG_SCHEMA = {
-    cv.GenerateID(CONF_SIM7680C_ID): cv.use_id(Sim7680cComponent),
+    cv.GenerateID(CONF_SIM7680C_ID): cv.use_id(Sim7680CComponent),
     cv.Optional(CONF_RSSI): sensor.sensor_schema(
         unit_of_measurement=UNIT_DECIBEL_MILLIWATT,
         accuracy_decimals=0,

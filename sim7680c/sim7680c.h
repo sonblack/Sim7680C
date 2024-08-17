@@ -47,7 +47,7 @@ enum State {
   STATE_RECEIVED_USSD
 };
 
-class Sim7680cComponent : public uart::UARTDevice, public PollingComponent {
+class Sim7680CComponent : public uart::UARTDevice, public PollingComponent {
  public:
   /// Retrieve the latest sensor values. This operation takes approximately 16ms.
   void update() override;
@@ -121,44 +121,44 @@ class Sim7680cComponent : public uart::UARTDevice, public PollingComponent {
   CallbackManager<void(std::string)> ussd_received_callback_;
 };
 
-class Sim7680cReceivedMessageTrigger : public Trigger<std::string, std::string> {
+class Sim7680CReceivedMessageTrigger : public Trigger<std::string, std::string> {
  public:
-  explicit Sim7680cReceivedMessageTrigger(Sim7680cComponent *parent) {
+  explicit Sim7680CReceivedMessageTrigger(Sim7680CComponent *parent) {
     parent->add_on_sms_received_callback(
         [this](const std::string &message, const std::string &sender) { this->trigger(message, sender); });
   }
 };
 
-class Sim7680cIncomingCallTrigger : public Trigger<std::string> {
+class Sim7680CIncomingCallTrigger : public Trigger<std::string> {
  public:
-  explicit Sim7680cIncomingCallTrigger(Sim7680cComponent *parent) {
+  explicit Sim7680CIncomingCallTrigger(Sim7680CComponent *parent) {
     parent->add_on_incoming_call_callback([this](const std::string &caller_id) { this->trigger(caller_id); });
   }
 };
 
-class Sim7680cCallConnectedTrigger : public Trigger<> {
+class Sim7680CCallConnectedTrigger : public Trigger<> {
  public:
-  explicit Sim7680cCallConnectedTrigger(Sim7680cComponent *parent) {
+  explicit Sim7680CCallConnectedTrigger(Sim7680CComponent *parent) {
     parent->add_on_call_connected_callback([this]() { this->trigger(); });
   }
 };
 
-class Sim7680cCallDisconnectedTrigger : public Trigger<> {
+class Sim7680CCallDisconnectedTrigger : public Trigger<> {
  public:
-  explicit Sim7680cCallDisconnectedTrigger(Sim7680cComponent *parent) {
+  explicit Sim7680CCallDisconnectedTrigger(Sim7680CComponent *parent) {
     parent->add_on_call_disconnected_callback([this]() { this->trigger(); });
   }
 };
-class Sim7680cReceivedUssdTrigger : public Trigger<std::string> {
+class Sim7680CReceivedUssdTrigger : public Trigger<std::string> {
  public:
-  explicit Sim7680cReceivedUssdTrigger(Sim7680cComponent *parent) {
+  explicit Sim7680CReceivedUssdTrigger(Sim7680CComponent *parent) {
     parent->add_on_ussd_received_callback([this](const std::string &ussd) { this->trigger(ussd); });
   }
 };
 
-template<typename... Ts> class Sim7680cSendSmsAction : public Action<Ts...> {
+template<typename... Ts> class Sim7680CSendSmsAction : public Action<Ts...> {
  public:
-  Sim7680cSendSmsAction(Sim7680cComponent *parent) : parent_(parent) {}
+  Sim7680CSendSmsAction(Sim7680CComponent *parent) : parent_(parent) {}
   TEMPLATABLE_VALUE(std::string, recipient)
   TEMPLATABLE_VALUE(std::string, message)
 
@@ -169,12 +169,12 @@ template<typename... Ts> class Sim7680cSendSmsAction : public Action<Ts...> {
   }
 
  protected:
-  Sim7680cComponent *parent_;
+  Sim7680CComponent *parent_;
 };
 
-template<typename... Ts> class Sim7680cSendUssdAction : public Action<Ts...> {
+template<typename... Ts> class Sim7680CSendUssdAction : public Action<Ts...> {
  public:
-  Sim7680cSendUssdAction(Sim7680cComponent *parent) : parent_(parent) {}
+  Sim7680CSendUssdAction(Sim7680CComponent *parent) : parent_(parent) {}
   TEMPLATABLE_VALUE(std::string, ussd)
 
   void play(Ts... x) {
@@ -183,12 +183,12 @@ template<typename... Ts> class Sim7680cSendUssdAction : public Action<Ts...> {
   }
 
  protected:
-  Sim7680cComponent *parent_;
+  Sim7680CComponent *parent_;
 };
 
-template<typename... Ts> class Sim7680cDialAction : public Action<Ts...> {
+template<typename... Ts> class Sim7680CDialAction : public Action<Ts...> {
  public:
-  Sim7680cDialAction(Sim7680cComponent *parent) : parent_(parent) {}
+  Sim7680CDialAction(Sim7680CComponent *parent) : parent_(parent) {}
   TEMPLATABLE_VALUE(std::string, recipient)
 
   void play(Ts... x) {
@@ -197,26 +197,26 @@ template<typename... Ts> class Sim7680cDialAction : public Action<Ts...> {
   }
 
  protected:
-  Sim7680cComponent *parent_;
+  Sim7680CComponent *parent_;
 };
-template<typename... Ts> class Sim7680cConnectAction : public Action<Ts...> {
+template<typename... Ts> class Sim7680CConnectAction : public Action<Ts...> {
  public:
-  Sim7680cConnectAction(Sim7680cComponent *parent) : parent_(parent) {}
+  Sim7680CConnectAction(Sim7680CComponent *parent) : parent_(parent) {}
 
   void play(Ts... x) { this->parent_->connect(); }
 
  protected:
-  Sim7680cComponent *parent_;
+  Sim7680CComponent *parent_;
 };
 
-template<typename... Ts> class Sim7680cDisconnectAction : public Action<Ts...> {
+template<typename... Ts> class Sim7680CDisconnectAction : public Action<Ts...> {
  public:
-  Sim7680cDisconnectAction(Sim7680cComponent *parent) : parent_(parent) {}
+  Sim7680CDisconnectAction(Sim7680CComponent *parent) : parent_(parent) {}
 
   void play(Ts... x) { this->parent_->disconnect(); }
 
  protected:
-  Sim7680cComponent *parent_;
+  Sim7680CComponent *parent_;
 };
 
 }  // namespace sim7680c

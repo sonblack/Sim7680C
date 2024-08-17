@@ -5,14 +5,14 @@ from esphome.const import (
     DEVICE_CLASS_CONNECTIVITY,
     ENTITY_CATEGORY_DIAGNOSTIC,
 )
-from . import CONF_SIM7680C_ID, Sim7680cComponent
+from . import CONF_SIM7680C_ID, Sim7680CComponent
 
 DEPENDENCIES = ["sim7680c"]
 
 CONF_REGISTERED = "registered"
 
 CONFIG_SCHEMA = {
-    cv.GenerateID(CONF_SIM7680C_ID): cv.use_id(Sim7680cComponent),
+    cv.GenerateID(CONF_SIM7680C_ID): cv.use_id(Sim7680CComponent),
     cv.Optional(CONF_REGISTERED): binary_sensor.binary_sensor_schema(
         device_class=DEVICE_CLASS_CONNECTIVITY,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,

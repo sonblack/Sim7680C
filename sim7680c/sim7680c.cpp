@@ -10,7 +10,7 @@ static const char *const TAG = "sim7680c";
 const char ASCII_CR = 0x0D;
 const char ASCII_LF = 0x0A;
 
-void Sim7680cComponent::update() {
+void Sim7680CComponent::update() {
   if (this->watch_dog_++ == 2) {
     this->state_ = STATE_INIT;
     this->write(26);
@@ -37,7 +37,7 @@ void Sim7680cComponent::update() {
     } else if (this->registered_ && this->disconnect_pending_) {
       this->disconnect_pending_ = false;
       ESP_LOGI(TAG, "Disconnecting...");
-      this->send_cmd_("AT+CHUP");
+      this->send_cmd_("ATH");
     } else if (this->registered_ && this->call_state_ != 6) {
       send_cmd_("AT+CLCC");
       this->state_ = STATE_CHECK_CALL;
@@ -58,7 +58,7 @@ void Sim7680cComponent::update() {
   }
 }
 
-void Sim7680cComponent::send_cmd_(const std::string &message) {
+void Sim7680CComponent::send_cmd_(const std::string &message) {
   ESP_LOGV(TAG, "S: %s - %d", message.c_str(), this->state_);
   this->watch_dog_ = 0;
   this->write_str(message.c_str());
@@ -66,7 +66,7 @@ void Sim7680cComponent::send_cmd_(const std::string &message) {
   this->write_byte(ASCII_LF);
 }
 
-void Sim7680cComponent::parse_cmd_(std::string message) {
+void Sim7680CComponent::parse_cmd_(std::string message) {
   if (message.empty())
     return;
 
@@ -154,7 +154,6 @@ void Sim7680cComponent::parse_cmd_(std::string message) {
       this->expect_ack_ = true;
       break;
     case STATE_SEND_USSD1:
-      //this->send_cmd_("AT*IMSRCFG=\"switch\"");
       this->send_cmd_("AT+CUSD=1, \"" + this->ussd_ + "\"");
       this->state_ = STATE_SEND_USSD2;
       this->expect_ack_ = true;
@@ -196,7 +195,7 @@ void Sim7680cComponent::parse_cmd_(std::string message) {
     case STATE_CREG_WAIT: {
       // Response: "+CREG: 0,1" -- the one there means registered ok
       //           "+CREG: -,-" means not registered ok
-      bool registered = message.compare(0, 6, "+CREG:") == 0 && (message[9] == '1' || message[9] == '6');
+      bool registered = message.compare(0, 6, "+CREG:") == 0 && (message[9] == '1' || message[9] == '5');
       if (registered) {
         if (!this->registered_) {
           ESP_LOGD(TAG, "Registered OK");
@@ -415,7 +414,7 @@ void Sim7680cComponent::parse_cmd_(std::string message) {
   }
 }  // namespace sim7680c
 
-void Sim7680cComponent::loop() {
+void Sim7680CComponent::loop() {
   // Read message
   while (this->available()) {
     uint8_t byte;
@@ -450,19 +449,19 @@ void Sim7680cComponent::loop() {
   }
 }
 
-void Sim7680cComponent::send_sms(const std::string &recipient, const std::string &message) {
+void Sim7680CComponent::send_sms(const std::string &recipient, const std::string &message) {
   this->recipient_ = recipient;
   this->outgoing_message_ = message;
   this->send_pending_ = true;
 }
 
-void Sim7680cComponent::send_ussd(const std::string &ussd_code) {
+void Sim7680CComponent::send_ussd(const std::string &ussd_code) {
   ESP_LOGD(TAG, "Sending USSD code: %s", ussd_code.c_str());
   this->ussd_ = ussd_code;
   this->send_ussd_pending_ = true;
   this->update();
 }
-void Sim7680cComponent::dump_config() {
+void Sim7680CComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "SIM7680C:");
 #ifdef USE_BINARY_SENSOR
   LOG_BINARY_SENSOR("  ", "Registered", this->registered_binary_sensor_);
@@ -471,14 +470,14 @@ void Sim7680cComponent::dump_config() {
   LOG_SENSOR("  ", "Rssi", this->rssi_sensor_);
 #endif
 }
-void Sim7680cComponent::dial(const std::string &recipient) {
+void Sim7680CComponent::dial(const std::string &recipient) {
   this->recipient_ = recipient;
   this->dial_pending_ = true;
 }
-void Sim7680cComponent::connect() { this->connect_pending_ = true; }
-void Sim7680cComponent::disconnect() { this->disconnect_pending_ = true; }
+void Sim7680CComponent::connect() { this->connect_pending_ = true; }
+void Sim7680CComponent::disconnect() { this->disconnect_pending_ = true; }
 
-void Sim7680cComponent::set_registered_(bool registered) {
+void Sim7680CComponent::set_registered_(bool registered) {
   this->registered_ = registered;
 #ifdef USE_BINARY_SENSOR
   if (this->registered_binary_sensor_ != nullptr)

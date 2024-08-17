@@ -3,6 +3,7 @@ import esphome.config_validation as cv
 from esphome import automation
 from esphome.const import (
     CONF_ID,
+    CONF_MESSAGE,
     CONF_TRIGGER_ID,
 )
 from esphome.components import uart
@@ -12,37 +13,37 @@ CODEOWNERS = ["@sonblack"]
 MULTI_CONF = True
 
 sim7680c_ns = cg.esphome_ns.namespace("sim7680c")
-Sim7680cComponent = sim7680c_ns.class_("Sim7680cComponent", cg.Component)
+Sim7680CComponent = sim7680c_ns.class_("Sim7680CComponent", cg.Component)
 
-Sim7680cReceivedMessageTrigger = sim7680c_ns.class_(
-    "Sim7680cReceivedMessageTrigger",
+Sim7680CReceivedMessageTrigger = sim7680c_ns.class_(
+    "Sim7680CReceivedMessageTrigger",
     automation.Trigger.template(cg.std_string, cg.std_string),
 )
-Sim7680cIncomingCallTrigger = sim7680c_ns.class_(
-    "Sim7680cIncomingCallTrigger",
+Sim7680CIncomingCallTrigger = sim7680c_ns.class_(
+    "Sim7680CIncomingCallTrigger",
     automation.Trigger.template(cg.std_string),
 )
-Sim7680cCallConnectedTrigger = sim7680c_ns.class_(
-    "Sim7680cCallConnectedTrigger",
+Sim7680CCallConnectedTrigger = sim7680c_ns.class_(
+    "Sim7680CCallConnectedTrigger",
     automation.Trigger.template(),
 )
-Sim7680cCallDisconnectedTrigger = sim7680c_ns.class_(
-    "Sim7680cCallDisconnectedTrigger",
+Sim7680CCallDisconnectedTrigger = sim7680c_ns.class_(
+    "Sim7680CCallDisconnectedTrigger",
     automation.Trigger.template(),
 )
 
-Sim7680cReceivedUssdTrigger = sim7680c_ns.class_(
-    "Sim7680cReceivedUssdTrigger",
+Sim7680CReceivedUssdTrigger = sim7680c_ns.class_(
+    "Sim7680CReceivedUssdTrigger",
     automation.Trigger.template(cg.std_string),
 )
 
 # Actions
-Sim7680cSendSmsAction = sim7680c_ns.class_("Sim7680cSendSmsAction", automation.Action)
-Sim7680cSendUssdAction = sim7680c_ns.class_("Sim7680cSendUssdAction", automation.Action)
-Sim7680cDialAction = sim7680c_ns.class_("Sim7680cDialAction", automation.Action)
-Sim7680cConnectAction = sim7680c_ns.class_("Sim7680cConnectAction", automation.Action)
-Sim7680cDisconnectAction = sim7680c_ns.class_(
-    "Sim7680cDisconnectAction", automation.Action
+Sim7680CSendSmsAction = sim7680c_ns.class_("Sim7680CSendSmsAction", automation.Action)
+Sim7680CSendUssdAction = sim7680c_ns.class_("Sim7680CSendUssdAction", automation.Action)
+Sim7680CDialAction = sim7680c_ns.class_("Sim7680CDialAction", automation.Action)
+Sim7680CConnectAction = sim7680c_ns.class_("Sim7680CConnectAction", automation.Action)
+Sim7680CDisconnectAction = sim7680c_ns.class_(
+    "Sim7680CDisconnectAction", automation.Action
 )
 
 CONF_SIM7680C_ID = "sim7680c_id"
@@ -52,45 +53,44 @@ CONF_ON_INCOMING_CALL = "on_incoming_call"
 CONF_ON_CALL_CONNECTED = "on_call_connected"
 CONF_ON_CALL_DISCONNECTED = "on_call_disconnected"
 CONF_RECIPIENT = "recipient"
-CONF_MESSAGE = "message"
 CONF_USSD = "ussd"
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
-            cv.GenerateID(): cv.declare_id(Sim7680cComponent),
+            cv.GenerateID(): cv.declare_id(Sim7680CComponent),
             cv.Optional(CONF_ON_SMS_RECEIVED): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(
-                        Sim7680cReceivedMessageTrigger
+                        Sim7680CReceivedMessageTrigger
                     ),
                 }
             ),
             cv.Optional(CONF_ON_INCOMING_CALL): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(
-                        Sim7680cIncomingCallTrigger
+                        Sim7680CIncomingCallTrigger
                     ),
                 }
             ),
             cv.Optional(CONF_ON_CALL_CONNECTED): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(
-                        Sim7680cCallConnectedTrigger
+                        Sim7680CCallConnectedTrigger
                     ),
                 }
             ),
             cv.Optional(CONF_ON_CALL_DISCONNECTED): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(
-                        Sim7680cCallDisconnectedTrigger
+                        Sim7680CCallDisconnectedTrigger
                     ),
                 }
             ),
             cv.Optional(CONF_ON_USSD_RECEIVED): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(
-                        Sim7680cReceivedUssdTrigger
+                        Sim7680CReceivedUssdTrigger
                     ),
                 }
             ),
@@ -131,7 +131,7 @@ async def to_code(config):
 
 SIM7680C_SEND_SMS_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(): cv.use_id(Sim7680cComponent),
+        cv.GenerateID(): cv.use_id(Sim7680CComponent),
         cv.Required(CONF_RECIPIENT): cv.templatable(cv.string_strict),
         cv.Required(CONF_MESSAGE): cv.templatable(cv.string),
     }
@@ -139,7 +139,7 @@ SIM7680C_SEND_SMS_SCHEMA = cv.Schema(
 
 
 @automation.register_action(
-    "sim7680c.send_sms", Sim7680cSendSmsAction, SIM7680C_SEND_SMS_SCHEMA
+    "sim7680c.send_sms", Sim7680CSendSmsAction, SIM7680C_SEND_SMS_SCHEMA
 )
 async def sim7680c_send_sms_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
@@ -153,13 +153,13 @@ async def sim7680c_send_sms_to_code(config, action_id, template_arg, args):
 
 SIM7680C_DIAL_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(): cv.use_id(Sim7680cComponent),
+        cv.GenerateID(): cv.use_id(Sim7680CComponent),
         cv.Required(CONF_RECIPIENT): cv.templatable(cv.string_strict),
     }
 )
 
 
-@automation.register_action("sim7680c.dial", Sim7680cDialAction, SIM7680C_DIAL_SCHEMA)
+@automation.register_action("sim7680c.dial", Sim7680CDialAction, SIM7680C_DIAL_SCHEMA)
 async def sim7680c_dial_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
@@ -170,8 +170,8 @@ async def sim7680c_dial_to_code(config, action_id, template_arg, args):
 
 @automation.register_action(
     "sim7680c.connect",
-    Sim7680cConnectAction,
-    cv.Schema({cv.GenerateID(): cv.use_id(Sim7680cComponent)}),
+    Sim7680CConnectAction,
+    cv.Schema({cv.GenerateID(): cv.use_id(Sim7680CComponent)}),
 )
 async def sim7680c_connect_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
@@ -181,14 +181,14 @@ async def sim7680c_connect_to_code(config, action_id, template_arg, args):
 
 SIM7680C_SEND_USSD_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(): cv.use_id(Sim7680cComponent),
+        cv.GenerateID(): cv.use_id(Sim7680CComponent),
         cv.Required(CONF_USSD): cv.templatable(cv.string_strict),
     }
 )
 
 
 @automation.register_action(
-    "sim7680c.send_ussd", Sim7680cSendUssdAction, SIM7680C_SEND_USSD_SCHEMA
+    "sim7680c.send_ussd", Sim7680CSendUssdAction, SIM7680C_SEND_USSD_SCHEMA
 )
 async def sim7680c_send_ussd_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
@@ -200,8 +200,8 @@ async def sim7680c_send_ussd_to_code(config, action_id, template_arg, args):
 
 @automation.register_action(
     "sim7680c.disconnect",
-    Sim7680cDisconnectAction,
-    cv.Schema({cv.GenerateID(): cv.use_id(Sim7680cComponent)}),
+    Sim7680CDisconnectAction,
+    cv.Schema({cv.GenerateID(): cv.use_id(Sim7680CComponent)}),
 )
 async def sim7680c_disconnect_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
